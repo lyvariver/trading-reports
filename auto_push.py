@@ -24,14 +24,16 @@ print(f"📡 启动同步... 目标目录: {REPO_PATH}")
 # 只有当 alpha_radar_results.csv 发生变化时才推送
 status_res = subprocess.run(["git", "status", "--porcelain"], cwd=REPO_PATH, capture_output=True, text=True)
 
-if "alpha_radar_results.csv" not in status_res.stdout:
-    print("ℹ️ 提示: alpha_radar_results.csv 没有新数据，无需推送。")
-    # 如果你想强制推送，可以注释掉下面这一行
-    # exit(0)
+# --- 2. 检查是否有任何变化 (包括新挪进来的脚本) ---
+status_res = subprocess.run(["git", "status", "--porcelain"], cwd=REPO_PATH, capture_output=True, text=True)
 
-# --- 3. 执行标准三部曲 ---
+if not status_res.stdout.strip():
+    print("ℹ️ 提示: 没有任何文件变化，无需推送。")
+    exit(0)
+
+# --- 3. 执行标准三部曲 (由精确匹配改为全局匹配 '.') ---
 steps = [
-    ["git", "add", "alpha_radar_results.csv"],
+    ["git", "add", "."],  # 改为 . 确保脚本自己和CSV都能被装箱
     ["git", "commit", "-m", commit_message],
     ["git", "push"]
 ]
